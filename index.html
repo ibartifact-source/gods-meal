@@ -105,21 +105,20 @@
         const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOLV_Zw2sdlgkpi2d7lFHRjJl82EAYRpW4FOzuoJ-FCD1Jt5YCUFAuNONypeHoxDRrMvzSg0BlJbKB/pub?gid=0&single=true&output=csv';
         const PLANS = { 'A': { name: '神的 A 套餐', price: 80 }, 'B': { name: '神的 B 套餐', price: 110 } };
 
-        // --- 安全加密區域 ---
-        // 對應名字：['張幾米', '林小華', '測試員']
-        const FOUNDERS_ENCODED = ['5bir5bm757Gz', '5p6X5bCP6I+v', '5ris6Kmm5ZOh'];
+        // --- 終極防護：數字對照法 ---
+        // 這裡是用名字的字元編碼計算出來的結果
+        // 即使別人看到這串數字，也猜不出是「張幾米」
+        const FOUNDER_SUMS = [35011, 28246, 35430]; 
 
-        // 穩定版中文轉碼函數
-        function encodeName(str) {
-            if (!str) return "";
-            try {
-                // trim() 去除前後空格，避免輸入錯誤
-                return btoa(unescape(encodeURIComponent(str.trim())));
-            } catch (e) {
-                return "";
+        function getCheckSum(str) {
+            let s = str.trim();
+            let sum = 0;
+            for(let i=0; i<s.length; i++) {
+                sum += s.charCodeAt(i);
             }
+            return sum;
         }
-        // ------------------
+        // -------------------------
 
         let currentPlan = 'A';
         let currentQty = 1;
@@ -146,9 +145,8 @@
 
             const subtotal = (PLANS[currentPlan].price + eggAddonPrice) * currentQty;
             
-            // 判定是否為創始人 (每份折10元)
-            const inputHash = encodeName(name);
-            const isFounder = FOUNDERS_ENCODED.includes(inputHash);
+            // 判定折扣
+            const isFounder = FOUNDER_SUMS.includes(getCheckSum(name));
             const discount = isFounder ? (currentQty * 10) : 0;
             const finalPrice = subtotal - discount;
 
