@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>God's Meal | 神的套餐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; min-height: 100vh; color: white; font-family: -apple-system, sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .gold-gradient { background: linear-gradient(135deg, #fde68a 0%, #eab308 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .plan-card { transition: all 0.3s ease; cursor: pointer; border: 2px solid transparent; }
+        .plan-card.active { border-color: #eab308; background: rgba(234, 179, 8, 0.1); }
+        .vertical-text { writing-mode: vertical-lr; text-orientation: upright; letter-spacing: 0.1em; font-weight: 900; }
+        .founder-badge { background: linear-gradient(90deg, #422006, #78350f); border: 1px solid #f59e0b; color: #fbbf24; font-size: 10px; padding: 2px 8px; border-radius: 99px; }
+        @keyframes breathe { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .loading-dot { animation: breathe 1.5s infinite; }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+    <div id="step1" class="max-w-md mx-auto">
+        <header class="text-center py-6">
+            <h1 class="text-4xl font-black italic tracking-tighter gold-gradient uppercase">GOD'S MEAL</h1>
+            <p class="text-slate-500 text-[10px] tracking-[0.4em] uppercase">12:00 Lunch Selection</p>
+        </header>
+
+        <div class="space-y-3">
+            <div id="planA" class="plan-card glass rounded-[1.5rem] p-5 active" onclick="selectPlan('A')">
+                <div class="flex justify-between items-center">
+                    <div><h3 class="font-bold text-lg">神的 A 套餐</h3><p class="text-slate-400 text-xs">經典原味組合</p></div>
+                    <p class="text-2xl font-black text-yellow-500">$80</p>
+                </div>
+            </div>
+            <div id="planB" class="plan-card glass rounded-[1.5rem] p-5" onclick="selectPlan('B')">
+                <div class="flex justify-between items-center">
+                    <div><h3 class="font-bold text-lg">神的 B 套餐</h3><p class="text-slate-400 text-xs">奢華豐盛組合</p></div>
+                    <p class="text-2xl font-black text-yellow-500">$110</p>
+                </div>
+            </div>
+
+            <div class="glass rounded-[2rem] p-6 space-y-6 mt-4 border-t-2 border-yellow-500/30 shadow-2xl">
+                <div class="flex items-center justify-between px-2">
+                    <span class="font-bold text-xs text-slate-400 uppercase tracking-widest">套餐數量</span>
+                    <div class="flex items-center gap-6">
+                        <button onclick="changeQty(-1)" class="text-2xl text-slate-500">－</button>
+                        <span id="qtyDisplay" class="text-2xl font-black font-mono">1</span>
+                        <button onclick="changeQty(1)" class="text-2xl text-yellow-500">＋</button>
+                    </div>
+                </div>
+
+                <div class="relative bg-slate-900/50 border border-white/5 rounded-2xl p-5 flex gap-5 items-center">
+                    <div class="flex flex-col items-center border-r border-white/10 pr-4">
+                        <span class="text-xl mb-1">🥚</span>
+                        <div class="vertical-text gold-gradient text-sm leading-tight">醇香泡蛋計畫</div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-[9px] text-slate-500 italic mb-2 uppercase tracking-tighter">One Egg Per Meal Max</p>
+                        <select id="eggPlan" class="w-full bg-slate-950 border border-yellow-500/30 text-yellow-500 rounded-lg py-2 px-3 text-sm outline-none">
+                            <option value="0">不加購</option>
+                            <option value="15">加一顆蛋 (+ $15)</option>
+                            <option value="B1G1">⭐⭐⭐⭐⭐ 五星好評買一送一 ($15)</option>
+                        </select>
+                        <p class="text-[8px] text-yellow-500/40 mt-3 leading-tight">*選「買1送1」者取餐請出示 Google 評論</p>
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-2">
+                    <input id="userName" type="text" placeholder="您的尊姓大名" class="w-full bg-transparent text-center text-2xl font-bold py-2 outline-none border-b border-slate-800 focus:border-yellow-500">
+                    <input id="userNote" type="text" placeholder="備註 (加辣、晚點到...)" class="w-full bg-transparent text-center text-sm py-2 outline-none border-b border-slate-800 focus:border-yellow-500 text-slate-400">
+                </div>
+
+                <button onclick="previewOrder()" class="w-full bg-yellow-500 text-slate-900 font-black py-5 rounded-2xl shadow-xl text-lg active:scale-95 transition-all">下一步：確認內容</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="step2" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-950/95">
+        <div class="glass w-full max-w-sm rounded-[3rem] p-8 border border-yellow-500/20">
+            <h2 class="text-center text-yellow-500 font-black tracking-widest mb-6 uppercase text-sm">訂單預覽</h2>
+            <div class="space-y-4 bg-black/30 p-6 rounded-3xl mb-6 text-sm font-mono border border-white/5" id="preContent"></div>
+            <button onclick="confirmOrder()" class="w-full bg-yellow-500 text-black font-black py-5 rounded-2xl mb-3">確認並報到</button>
+            <button onclick="backToEdit()" class="w-full text-slate-500 text-xs py-2">返回修改</button>
+        </div>
+    </div>
+
+    <div id="step3" class="hidden max-w-md mx-auto text-center py-10">
+        <div class="glass rounded-[3rem] p-10 border border-white/5 shadow-2xl">
+            <p class="text-[10px] text-slate-500 tracking-[0.4em] uppercase mb-10">Verification Pending</p>
+            <div id="statusBox" class="mb-10 transition-all duration-1000">
+                <h2 id="speedCode" class="text-7xl font-black text-yellow-500 tracking-tighter mb-4"></h2>
+                <div class="flex items-center justify-center gap-2">
+                    <span class="loading-dot w-2 h-2 bg-yellow-500 rounded-full"></span>
+                    <p id="statusText" class="text-yellow-500 font-bold tracking-widest">正在確認庫存</p>
+                </div>
+            </div>
+            <button onclick="copyAndLine()" class="w-full bg-white text-black font-black py-5 rounded-2xl mb-4">✅ 複製內容並報到</button>
+            <button onclick="resetAll()" class="w-full text-slate-600 text-[10px] uppercase">重新填寫新訂單</button>
+            <p id="orderIdTag" class="mt-12 text-[9px] text-slate-700 font-mono italic"></p>
+        </div>
+    </div>
+
+    <script>
+        const LINE_ID = "@867ootfe";
+        const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOLV_Zw2sdlgkpi2d7lFHRjJl82EAYRpW4FOzuoJ-FCD1Jt5YCUFAuNONypeHoxDRrMvzSg0BlJbKB/pub?gid=0&single=true&output=csv';
+        const PLANS = { 'A': { name: '神的 A 套餐', price: 80 }, 'B': { name: '神的 B 套餐', price: 110 } };
+
+        // --- 安全加密區域 ---
+        const FOUNDERS_ENCODED = ['5bir5bm757Gz', '5p6X5bCP6I+v', '5ris6Kmm5ZOh']; 
+        function encodeName(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+        }
+        // ------------------
+
+        let currentPlan = 'A';
+        let currentQty = 1;
+        let currentOrder = null;
+
+        function selectPlan(p) {
+            currentPlan = p;
+            document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('active'));
+            document.getElementById(`plan${p}`).classList.add('active');
+        }
+
+        function changeQty(delta) {
+            currentQty = Math.max(1, currentQty + delta);
+            document.getElementById('qtyDisplay').innerText = currentQty;
+        }
+
+        function previewOrder() {
+            const name = document.getElementById('userName').value.trim();
+            if (!name) return alert('請告知您的名諱');
+            
+            const eggVal = document.getElementById('eggPlan').value;
+            let eggAddonPrice = (eggVal === "0") ? 0 : 15;
+            let eggText = (eggVal === "0") ? "不加購" : (eggVal === "15" ? "加購一顆蛋 (+ $15)" : "五星好評買一送一 ($15)");
+
+            const subtotal = (PLANS[currentPlan].price + eggAddonPrice) * currentQty;
+            
+            // 使用加密比對
+            const discount = FOUNDERS_ENCODED.includes(encodeName(name)) ? (currentQty * 10) : 0;
+            const finalPrice = subtotal - discount;
+
+            currentOrder = {
+                name, plan: currentPlan, qty: currentQty, total: finalPrice,
+                egg: eggText,
+                note: document.getElementById('userNote').value.trim(),
+                speedCode: Math.floor(10000 + Math.random() * 90000)
+            };
+
+            document.getElementById('preContent').innerHTML = `
+                <div class="flex justify-between"><span class="text-slate-500">訂購人</span><span>${currentOrder.name}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">套餐</span><span>${PLANS[currentOrder.plan].name}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">數量</span><span>${currentOrder.qty}</span></div>
+                <div class="flex justify-between"><span class="text-slate-500">泡蛋</span><span>${currentOrder.egg}</span></div>
+                ${discount > 0 ? `<div class="flex justify-between text-red-400 items-center pt-2 border-t border-white/5"><span class="founder-badge">FOUNDER OFF</span><span>-$${discount}</span></div>` : ''}
+                <div class="flex justify-between text-lg font-bold border-t border-white/10 pt-4 mt-2"><span>應付總額</span><span class="text-yellow-500">$${finalPrice}</span></div>
+            `;
+            showStep(2);
+        }
+
+        function confirmOrder() {
+            showStep(3);
+            document.getElementById('speedCode').innerText = currentOrder.speedCode;
+            startPolling();
+        }
+
+        function showStep(s) {
+            ['step1', 'step2', 'step3'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(`step${s}`).classList.remove('hidden');
+        }
+
+        function startPolling() {
+            setInterval(async () => {
+                try {
+                    const res = await fetch(`${PUB_URL}&t=${Date.now()}`);
+                    const text = await res.text();
+                    if (text.includes(currentOrder.speedCode.toString())) {
+                        document.getElementById('speedCode').className = "text-7xl font-black text-green-400 tracking-tighter mb-4";
+                        document.getElementById('statusText').innerText = "🟢 庫存已確認";
+                        document.getElementById('statusText').className = "text-green-400 font-bold tracking-widest";
+                    }
+                } catch (e) {}
+            }, 3000);
+        }
+
+        function backToEdit() { showStep(1); }
+        function resetAll() { location.reload(); }
+
+        function copyAndLine() {
+            const msg = `【神的套餐 - 預約報到】\n👤 訂購人：${currentOrder.name}\n🍱 方案：${PLANS[currentOrder.plan].name}\n🔢 數量：${currentOrder.qty}\n🥚 泡蛋：${currentOrder.egg}\n💰 總計：${currentOrder.total}元\n✨ 提貨碼：${currentOrder.speedCode}\n💬 備註：${currentOrder.note || '無'}`;
+            navigator.clipboard.writeText(msg).then(() => {
+                alert('資訊已複製！');
+                window.location.href = `https://line.me/R/oaMessage/${LINE_ID}/`;
+            });
+        }
+    </script>
+</body>
+</html>
