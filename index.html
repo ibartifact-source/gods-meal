@@ -105,20 +105,8 @@
         const PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSOLV_Zw2sdlgkpi2d7lFHRjJl82EAYRpW4FOzuoJ-FCD1Jt5YCUFAuNONypeHoxDRrMvzSg0BlJbKB/pub?gid=0&single=true&output=csv';
         const PLANS = { 'A': { name: '神的 A 套餐', price: 80 }, 'B': { name: '神的 B 套餐', price: 110 } };
 
-        // --- 終極防護：數字對照法 ---
-        // 這裡是用名字的字元編碼計算出來的結果
-        // 即使別人看到這串數字，也猜不出是「張幾米」
-        const FOUNDER_SUMS = [35011, 28246, 35430]; 
-
-        function getCheckSum(str) {
-            let s = str.trim();
-            let sum = 0;
-            for(let i=0; i<s.length; i++) {
-                sum += s.charCodeAt(i);
-            }
-            return sum;
-        }
-        // -------------------------
+        // --- 直接用中文名單測試，這最不可能出錯 ---
+        const FOUNDERS = ['張幾米', '林小華', '測試員'];
 
         let currentPlan = 'A';
         let currentQty = 1;
@@ -136,8 +124,8 @@
         }
 
         function previewOrder() {
-            const name = document.getElementById('userName').value.trim();
-            if (!name) return alert('請告知您的名諱');
+            const nameInput = document.getElementById('userName').value.trim();
+            if (!nameInput) return alert('請告知您的名諱');
             
             const eggVal = document.getElementById('eggPlan').value;
             let eggAddonPrice = (eggVal === "0") ? 0 : 15;
@@ -145,13 +133,13 @@
 
             const subtotal = (PLANS[currentPlan].price + eggAddonPrice) * currentQty;
             
-            // 判定折扣
-            const isFounder = FOUNDER_SUMS.includes(getCheckSum(name));
+            // 直接判定中文
+            const isFounder = FOUNDERS.includes(nameInput);
             const discount = isFounder ? (currentQty * 10) : 0;
             const finalPrice = subtotal - discount;
 
             currentOrder = {
-                name, plan: currentPlan, qty: currentQty, total: finalPrice,
+                name: nameInput, plan: currentPlan, qty: currentQty, total: finalPrice,
                 egg: eggText,
                 note: document.getElementById('userNote').value.trim(),
                 speedCode: Math.floor(10000 + Math.random() * 90000)
