@@ -18,6 +18,7 @@
     </style>
 </head>
 <body class="p-4 md:p-6">
+
     <div id="step1" class="max-w-md mx-auto">
         <header class="text-center py-6">
             <h1 class="text-4xl font-black italic tracking-tighter gold-gradient uppercase">GOD'S MEAL</h1>
@@ -105,9 +106,18 @@
         const PLANS = { 'A': { name: '神的 A 套餐', price: 80 }, 'B': { name: '神的 B 套餐', price: 110 } };
 
         // --- 安全加密區域 ---
-        const FOUNDERS_ENCODED = ['5bir5bm757Gz', '5p6X5bCP6I+v', '5ris6Kmm5ZOh']; 
+        // 對應名字：['張幾米', '林小華', '測試員']
+        const FOUNDERS_ENCODED = ['5bir5bm757Gz', '5p6X5bCP6I+v', '5ris6Kmm5ZOh'];
+
+        // 穩定版中文轉碼函數
         function encodeName(str) {
-            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' + p1)));
+            if (!str) return "";
+            try {
+                // trim() 去除前後空格，避免輸入錯誤
+                return btoa(unescape(encodeURIComponent(str.trim())));
+            } catch (e) {
+                return "";
+            }
         }
         // ------------------
 
@@ -136,8 +146,10 @@
 
             const subtotal = (PLANS[currentPlan].price + eggAddonPrice) * currentQty;
             
-            // 使用加密比對
-            const discount = FOUNDERS_ENCODED.includes(encodeName(name)) ? (currentQty * 10) : 0;
+            // 判定是否為創始人 (每份折10元)
+            const inputHash = encodeName(name);
+            const isFounder = FOUNDERS_ENCODED.includes(inputHash);
+            const discount = isFounder ? (currentQty * 10) : 0;
             const finalPrice = subtotal - discount;
 
             currentOrder = {
@@ -152,7 +164,7 @@
                 <div class="flex justify-between"><span class="text-slate-500">套餐</span><span>${PLANS[currentOrder.plan].name}</span></div>
                 <div class="flex justify-between"><span class="text-slate-500">數量</span><span>${currentOrder.qty}</span></div>
                 <div class="flex justify-between"><span class="text-slate-500">泡蛋</span><span>${currentOrder.egg}</span></div>
-                ${discount > 0 ? `<div class="flex justify-between text-red-400 items-center pt-2 border-t border-white/5"><span class="founder-badge">FOUNDER OFF</span><span>-$${discount}</span></div>` : ''}
+                ${isFounder ? `<div class="flex justify-between text-red-400 items-center pt-2 border-t border-white/5"><span class="founder-badge">FOUNDER OFF</span><span>-$${discount}</span></div>` : ''}
                 <div class="flex justify-between text-lg font-bold border-t border-white/10 pt-4 mt-2"><span>應付總額</span><span class="text-yellow-500">$${finalPrice}</span></div>
             `;
             showStep(2);
